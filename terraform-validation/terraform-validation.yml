@@ -1,0 +1,31 @@
+parameters:
+  - name: debug
+    type: boolean
+    default: false
+
+  - name: varGroups
+    type: object
+    default: {}
+
+  - name: vmImage
+    type: string
+    default: 'ubuntu-latest'
+
+stages:
+  - stage: Validation
+    displayName: "Terraform Static Analysis"
+    variables:
+      - ${{ each vg in parameters.varGroups }}:
+          - group: ${{ vg }}
+      - name: System.Debug
+        value: ${{ parameters.debug }}
+    jobs:
+      - job: Validation
+        displayName: "Terraform Static Analysis"
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        workspace:
+          clean: all
+        steps:
+          - checkout: self
+            presistCredentials: true
