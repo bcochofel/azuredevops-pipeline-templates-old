@@ -1,0 +1,291 @@
+# Dependencies:
+# - required parameters
+#   - environment (environment to use), type "string"
+#   - module (module name), type "string"
+#   - debug (whether or not to debug pipeline), type "boolean"
+#   - variableGroupName (variable group with providers credentials), type "string"
+#   - workingDirectory (directory with the terraform files), type "string"
+#   - backendKey (terraform backend key for the tfstate file), type "string"
+#   - installTerraform (whether or not to install terraform binary), type "boolean"
+#   - terraformVersion (terraform version to install), type "string"
+#   - preInitSteps (list of steps to execute before init cmd), type "stepList"
+#   - postInitSteps (list of steps to execute after init cmd), type "stepList"
+#   - prePlanSteps (list of steps to execute before plan cmd), type "stepList"
+#   - postPlanSteps (list of steps to execute after plan cmd), type "stepList"
+#   - preApplySteps (list of steps to execute before apply cmd), type "stepList"
+#   - postApplySteps (list of steps to execute after apply cmd), type "stepList"
+#   - planEnvVars (object with environment variables mapping for the plan cmd), type "object"
+#   - planExtraArgs (extra arguments for the plan command), type "string"
+#   - applyEnvVars (object with environment variables mapping for apply cmd), type "object"
+#   - applyExtraArgs (extra arguments for the apply command), type "string"
+#   - terraformPlanFile (terraform plan output filename), type "string"
+#   - terraformJsonPlanFile (terraform plan JSON output filename), type "string"
+# - variable group passed with parameter variableGroupName with the following variables:
+#   - ARM_CLIENT_ID
+#   - ARM_SUBSCRIPTION_ID
+#   - ARM_TENANT_ID
+#   - ARM_OBJECT_ID
+#   - AZDO_ORG_SERVICE_URL
+#   - TF_IN_AUTOMATION
+#   - TF_BACKEND_RESOURCE_GROUP_NAME
+#   - TF_BACKEND_STORAGE_ACCOUNT_NAME
+#   - TF_BACKEND_CONTAINER_NAME
+# - variable group named ${{ parameters.variableGroupName }}-secrets with the following variables:
+#   - ARM_CLIENT_SECRET
+#   - AZDO_PERSONAL_ACCESS_TOKEN
+#
+# This pipeline adds a tag when commits to the default branch
+
+parameters:
+  - name: environment
+    type: string
+
+  - name: module
+    type: string
+
+  - name: debug
+    type: boolean
+
+  - name: variableGroupName
+    type: string
+
+  - name: workingDirectory
+    type: string
+
+  - name: backendKey
+    type: string
+
+  - name: installTerraform
+    type: boolean
+
+  - name: terraformVersion
+    type: string
+
+  - name: preInitSteps
+    type: stepList
+
+  - name: postInitSteps
+    type: stepList
+
+  - name: prePlanSteps
+    type: stepList
+
+  - name: postPlanSteps
+    type: stepList
+
+  - name: preApplySteps
+    type: stepList
+
+  - name: postApplySteps
+    type: stepList
+
+  - name: planEnvVars
+    type: object
+
+  - name: planExtraArgs
+    type: string
+
+  - name: applyEnvVars
+    type: object
+
+  - name: applyExtraArgs
+    type: string
+
+  - name: terraformPlanFile
+    type: string
+
+  - name: terraformJsonPlanFile
+    type: string
+
+stages :
+  - stage: Plan
+    displayName: Terraform Plan for ${{ parameters.environment }}
+    variables:
+      - group: ${{ parameters.variableGroupName }}
+      - group: ${{ parameters.variableGroupName }}-secrets
+      - name: installTerraformBinary
+        value: ${{ parameters.installTerraform }}
+      - name: TF_STATE_KEY
+        value: ${{ parameters.backendKey }}
+      - name: System.Debug
+        value: ${{ parameters.debug }}
+      - name: artifact_name
+        value: ${{ parameters.module }}-${{ parameters.environment }}-plan-$(Build.BuildID)
+    jobs:
+      - job: Plan
+        displayName: Terraform Plan for ${{ parameters.environment }}
+        continueOnError: false
+        steps:
+          - task: Bash@3
+            displayName: "[terraform install]"
+            condition: and(succeeded(), eq(variables['installTerraformBinary'], true))
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                curl -sL https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip --output terraform.zip
+                unzip terraform.zip
+                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+            env:
+              TF_VER: ${{ parameters.terraformVersion }}
+
+          - task: Bash@3
+            displayName: "[terraform version]"
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                terraform version
+
+          - ${{ each step in parameters.preInitSteps }}:
+              - ${{ step }}
+
+          - task: Bash@3
+            displayName: "[terraform init]"
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              workingDirectory: ${{ parameters.workingDirectory }}
+              script: |
+                set -eu
+                terraform init \
+                  -backend-config=resource_group_name=${TF_BACKEND_RESOURCE_GROUP_NAME} \
+                  -backend-config=storage_account_name=${TF_BACKEND_STORAGE_ACCOUNT_NAME} \
+                  -backend-config=container_name=${TF_BACKEND_CONTAINER_NAME} \
+                  -backend-config=key=${TF_STATE_KEY}
+            env:
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
+
+          - ${{ each step in parameters.postInitSteps }}:
+              - ${{ step }}
+
+          - ${{ each step in parameters.prePlanSteps }}:
+            - ${{ step }}
+
+          - task: Bash@3
+            displayName: "[terraform plan]"
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              workingDirectory: ${{ parameters.workingDirectory }}
+              script: |
+                set -eu
+                terraform plan -input=false -out=${TF_PLAN_FILE} ${{ parameters.planExtraArgs }}
+            env:
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
+              TF_PLAN_FILE: ".terraform/${{ parameters.terraformPlanFile }}"
+              # add custom environment variables for plan
+              ${{ each envVar in parameters.planEnvVars }}:
+                ${{ envVar.key }}: ${{ envVar.Value }}
+
+          - ${{ each step in parameters.postPlanSteps }}:
+              - ${{ step }}
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "${{ parameters.workingDirectory }}/.terraform"
+              artifactName: $(artifact_name)
+
+  - stage: Deploy
+    dependsOn: [Plan]
+    displayName: Terraform Deploy to ${{ parameters.environment }}
+    variables:
+      - group: ${{ parameters.variableGroupName }}
+      - group: ${{ parameters.variableGroupName }}-secrets
+      - name: installTerraformBinary
+        value: ${{ parameters.installTerraform }}
+      - name: TF_STATE_KEY
+        value: ${{ parameters.backendKey }}
+      - name: System.Debug
+        value: ${{ parameters.debug }}
+      - name: artifact_name
+        value: ${{ parameters.module }}-${{ parameters.environment }}-plan-$(Build.BuildID)
+    jobs:
+      - deployment: Deploy
+        environment: ${{ parameters.environment }}
+        displayName: Terraform Deploy to ${{ parameters.environment }}
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  persistCredentials: true
+                - download: none
+
+                - task: Bash@3
+                  displayName: "[terraform install]"
+                  condition: and(succeeded(), eq(variables['installTerraformBinary'], true))
+                  inputs:
+                    targetType: 'inline'
+                    failOnStderr: true
+                    script: |
+                      set -eu
+                      curl -sL https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip --output terraform.zip
+                      unzip terraform.zip
+                      echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+                  env:
+                    TF_VER: ${{ parameters.terraformVersion }}
+
+                - task: Bash@3
+                  displayName: "[terraform version]"
+                  inputs:
+                    targetType: 'inline'
+                    failOnStderr: true
+                    script: |
+                      set -eu
+                      terraform version
+
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifact: $(artifact_name)
+                    path: "${{ parameters.workingDirectory }}/.terraform"
+
+                - ${{ each step in parameters.preApplySteps }}:
+                  - ${{ step }}
+
+                - task: Bash@3
+                  displayName: "[terraform apply]"
+                  inputs:
+                    targetType: 'inline'
+                    failOnStderr: true
+                    workingDirectory: ${{ parameters.workingDirectory }}
+                    script: |
+                      set -eu
+                      chmod -R +x .terraform/plugins
+                      terraform apply -input=false -auto-approve ${TF_PLAN_FILE} ${{ parameters.applyExtraArgs }}
+                  env:
+                    ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+                    AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
+                    TF_PLAN_FILE: ".terraform/${{ parameters.terraformPlanFile }}"
+                    ${{ each envVar in parameters.applyEnvVars }}:
+                      ${{ envVar.key }}: ${{ envVar.Value }}
+
+                - ${{ each step in parameters.postApplySteps }}:
+                    - ${{ step }}
+
+                - task: gitversion/setup@0
+                  displayName: Install GitVersion
+                  inputs:
+                    versionSpec: '5.1.3'
+
+                - task: gitversion/execute@0
+                  displayName: Use GitVersion
+
+                - task: Bash@3
+                  displayName: Set Git TAG
+                  inputs:
+                    targetType: 'inline'
+                    workingDirectory: $(Build.SourcesDirectory)
+                    script: |
+                      set -eu
+                      git config --global user.name "BuildService"
+                      git config --global user.email "autobuild@bcochofel.net"
+                      git tag $GITVERSIONNUMBER
+                      git push origin $GITVERSIONNUMBER
+                  env:
+                    GITVERSIONNUMBER: $(assemblySemVer)

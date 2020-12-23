@@ -1,0 +1,33 @@
+name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    persistCredentials: true
+
+  - task: gitversion/setup@0
+    displayName: Install GitVersion
+    inputs:
+      versionSpec: '5.1.3'
+
+  - task: gitversion/execute@0
+    displayName: Use GitVersion
+
+  - task: Bash@3
+    displayName: Set Git TAG
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Build.SourcesDirectory)
+      script: |
+        set -eu
+        git config --global user.name "BuildService"
+        git config --global user.email "autobuild@bcochofel.net"
+        git tag $GITVERSIONNUMBER
+        git push origin $GITVERSIONNUMBER
+    env:
+      GITVERSIONNUMBER: $(assemblySemVer)
