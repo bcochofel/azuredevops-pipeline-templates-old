@@ -11,19 +11,31 @@ parameters:
     type: string
     default: 'ubuntu-latest'
 
-  - name: installTerraformVer
-    type: string
-    default: "0.13.4"
+  - name: installTerraform
+    type: boolean
+    default: true
 
-  - name: installConftestVer
+  - name: terraformVersion
     type: string
-    default: ""
+    default: 0.13.4
 
-  - name: installTFLintVer
+  - name: installConftest
+    type: boolean
+    default: true
+
+  - name: conftestVersion
     type: string
-    default: ""
+    default: 0.21.0
 
-  - name: tflintAzurermRulesetVer
+  - name: installTFLint
+    type: boolean
+    default: true
+
+  - name: tflintVersion
+    type: string
+    default: 0.20.2
+
+  - name: tflintRulesetAzurermVersion
     type: string
     default: 0.5.0
 
@@ -35,6 +47,12 @@ stages:
           - group: ${{ vg }}
       - name: System.Debug
         value: ${{ parameters.debug }}
+      - name: installTerraformBinary
+        value: ${{ parameters.installTerraform }}
+      - name: installConftestBinary
+        value: ${{ parameters.installConftest }}
+      - name: installTFLintBinary
+        value: ${{ parameters.installTFLint }}
     jobs:
       - job: Validation
         displayName: "Terraform Static Analysis"
@@ -48,7 +66,7 @@ stages:
 
           - task: Bash@3
             displayName: "[terraform install]"
-            condition: and(succeeded(), ne('${{ parameters.installTerraformVer }}', ''))
+            condition: and(succeeded(), eq(variables['installTerraformBinary'], true))
             inputs:
               targetType: 'inline'
               failOnStderr: true
@@ -58,7 +76,7 @@ stages:
                 unzip terraform.zip
                 echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
             env:
-              TF_VER: ${{ parameters.installTerraformVer }}
+              TF_VER: ${{ parameters.terraformVersion }}
 
           - task: Bash@3
             displayName: "[terraform version]"
@@ -71,7 +89,7 @@ stages:
 
           - task: Bash@3
             displayName: "[conftest install]"
-            condition: and(succeeded(), ne('${{ parameters.installConftestVer }}', ''))
+            condition: and(succeeded(), eq(variables['installConftestBinary'], true))
             inputs:
               targetType: 'inline'
               failOnStderr: true
@@ -81,7 +99,7 @@ stages:
                 tar zxf conftest.tgz
                 echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
             env:
-              CONFTEST_VER: ${{ parameters.installConftestVer }}
+              CONFTEST_VER: ${{ parameters.conftestVersion }}
 
           - task: Bash@3
             displayName: "[conftest version]"
@@ -94,7 +112,7 @@ stages:
 
           - task: Bash@3
             displayName: "[tflint install]"
-            condition: and(succeeded(), ne('${{ parameters.installTFLintVer }}', ''))
+            condition: and(succeeded(), eq(variables['installTFLintBinary'], true))
             inputs:
               targetType: 'inline'
               failOnStderr: true
@@ -112,8 +130,8 @@ stages:
                 echo "##vso[task.setvariable variable=tflint_plugin_dir;]$(Build.SourcesDirectory)"
                 echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
             env:
-              TFLINT_VER: ${{ parameters.installTFLintVer }}
-              TFLINT_AZURERM_VER: ${{ parameters.tflintAzurermRulesetVer }}
+              TFLINT_VER: ${{ parameters.tflintVersion }}
+              TFLINT_AZURERM_VER: ${{ parameters.tflintRulesetAzurermVersion }}
 
           - task: Bash@3
             displayName: "[tflint version]"
