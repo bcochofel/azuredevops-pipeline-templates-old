@@ -11,6 +11,22 @@ parameters:
     type: string
     default: 'ubuntu-latest'
 
+  - name: installTerraformVer
+    type: string
+    default: "0.13.4"
+
+  - name: installConftestVer
+    type: string
+    default: ""
+
+  - name: installTFLintVer
+    type: string
+    default: ""
+
+  - name: tflintAzurermRulesetVer
+    type: string
+    default: 0.5.0
+
 stages:
   - stage: Validation
     displayName: "Terraform Static Analysis"
@@ -29,3 +45,81 @@ stages:
         steps:
           - checkout: self
             presistCredentials: true
+
+          - task: Bash@3
+            displayName: "[terraform install]"
+            condition: and(succeeded(), ne('${{ parameters.installTerraformVer }}', ''))
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                curl -sL https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip --output terraform.zip
+                unzip terraform.zip
+                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+            env:
+              TF_VER: ${{ parameters.installTerraformVer }}
+
+          - task: Bash@3
+            displayName: "[terraform version]"
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                terraform version
+
+          - task: Bash@3
+            displayName: "[conftest install]"
+            condition: and(succeeded(), ne('${{ parameters.installConftestVer }}', ''))
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                curl -sL https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VER}/conftest_${CONFTEST_VER}_Linux_x86_64.tar.gz --output conftest.tgz
+                tar zxf conftest.tgz
+                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+            env:
+              CONFTEST_VER: ${{ parameters.installConftestVer }}
+
+          - task: Bash@3
+            displayName: "[conftest version]"
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                conftest --version
+
+          - task: Bash@3
+            displayName: "[tflint install]"
+            condition: and(succeeded(), ne('${{ parameters.installTFLintVer }}', ''))
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                curl -sL https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VER}/tflint_linux_amd64.zip --output tflint.zip
+                unzip tflint.zip
+                curl -sL https://github.com/terraform-linters/tflint-ruleset-azurerm/releases/download/v${TFLINT_AZURERM_VER}/tflint-ruleset-azurerm_linux_amd64.zip --output tflint-azurerm.zip
+                unzip tflint-azurerm.zip
+                cat << EOF > tflint.hcl
+                plugin "azurerm" {
+                  enabled = true
+                }
+                EOF
+                echo "##vso[task.setvariable variable=tflint_plugin_dir;]$(Build.SourcesDirectory)"
+                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+            env:
+              TFLINT_VER: ${{ parameters.installTFLintVer }}
+              TFLINT_AZURERM_VER: ${{ parameters.tflintAzurermRulesetVer }}
+
+          - task: Bash@3
+            displayName: "[tflint version]"
+            inputs:
+              targetType: 'inline'
+              failOnStderr: true
+              script: |
+                set -eu
+                tflint --config=$(Build.SourcesDirectory)/tflint.hcl --version
