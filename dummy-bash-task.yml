@@ -1,0 +1,13 @@
+steps:
+  - task: Bash@3
+    displayName: "[dummy bash task]"
+    inputs:
+      targetType: 'inline'
+      script: |
+        env
+        pwd
+        ls -al
+        ls -al ../
+        ls -al $DEFAULT_WORKING_DIR
+    env:
+      DEFAULT_WORKING_DIR: $(System.DefaultWorkingDirectory)
