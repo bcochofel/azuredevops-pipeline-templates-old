@@ -64,80 +64,18 @@ stages:
           - checkout: self
             persistCredentials: true
 
-          - task: Bash@3
-            displayName: "[terraform install]"
+          - template: install-terraform.yml
             condition: and(succeeded(), eq(variables['installTerraformBinary'], true))
-            inputs:
-              targetType: 'inline'
-              failOnStderr: true
-              script: |
-                set -eu
-                curl -sL https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip --output terraform.zip
-                unzip terraform.zip
-                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
-            env:
-              TF_VER: ${{ parameters.terraformVersion }}
+            parameters:
+              terraformVersion: ${{ parameters.terraformVersion }}
 
-          - task: Bash@3
-            displayName: "[terraform version]"
-            inputs:
-              targetType: 'inline'
-              failOnStderr: true
-              script: |
-                set -eu
-                terraform version
-
-          - task: Bash@3
-            displayName: "[conftest install]"
+          - template: install-conftest.yml
             condition: and(succeeded(), eq(variables['installConftestBinary'], true))
-            inputs:
-              targetType: 'inline'
-              failOnStderr: true
-              script: |
-                set -eu
-                curl -sL https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VER}/conftest_${CONFTEST_VER}_Linux_x86_64.tar.gz --output conftest.tgz
-                tar zxf conftest.tgz
-                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
-            env:
-              CONFTEST_VER: ${{ parameters.conftestVersion }}
+            parameters:
+              conftestVersion: ${{ parameters.conftestVersion }}
 
-          - task: Bash@3
-            displayName: "[conftest version]"
-            inputs:
-              targetType: 'inline'
-              failOnStderr: true
-              script: |
-                set -eu
-                conftest --version
-
-          - task: Bash@3
-            displayName: "[tflint install]"
+          - template: install-tflint.yml
             condition: and(succeeded(), eq(variables['installTFLintBinary'], true))
-            inputs:
-              targetType: 'inline'
-              failOnStderr: true
-              script: |
-                set -eu
-                curl -sL https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VER}/tflint_linux_amd64.zip --output tflint.zip
-                unzip tflint.zip
-                curl -sL https://github.com/terraform-linters/tflint-ruleset-azurerm/releases/download/v${TFLINT_AZURERM_VER}/tflint-ruleset-azurerm_linux_amd64.zip --output tflint-azurerm.zip
-                unzip tflint-azurerm.zip
-                cat << EOF > tflint.hcl
-                plugin "azurerm" {
-                  enabled = true
-                }
-                EOF
-                echo "##vso[task.setvariable variable=tflint_plugin_dir;]$(Build.SourcesDirectory)"
-                echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
-            env:
-              TFLINT_VER: ${{ parameters.tflintVersion }}
-              TFLINT_AZURERM_VER: ${{ parameters.tflintRulesetAzurermVersion }}
-
-          - task: Bash@3
-            displayName: "[tflint version]"
-            inputs:
-              targetType: 'inline'
-              failOnStderr: true
-              script: |
-                set -eu
-                tflint --config=$(Build.SourcesDirectory)/tflint.hcl --version
+            parameters:
+              tflintVersion: ${{ parameters.tflintVersion }}
+              tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
