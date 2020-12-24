@@ -65,17 +65,17 @@ stages:
             persistCredentials: true
 
           - template: install-terraform.yml
-            condition: and(succeeded(), eq(variables['installTerraformBinary'], true))
             parameters:
+              installTerraform: ${{ parameters.installTerraform }}
               terraformVersion: ${{ parameters.terraformVersion }}
 
           - template: install-conftest.yml
-            condition: and(succeeded(), eq(variables['installConftestBinary'], true))
             parameters:
+              installConftest: ${{ parameters.installConftest }}
               conftestVersion: ${{ parameters.conftestVersion }}
 
           - template: install-tflint.yml
-            condition: and(succeeded(), eq(variables['installTFLintBinary'], true))
             parameters:
+              installTFLint: ${{ parameters.installTFLint }}
               tflintVersion: ${{ parameters.tflintVersion }}
               tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
