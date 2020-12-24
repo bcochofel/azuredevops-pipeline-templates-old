@@ -50,6 +50,9 @@ parameters:
   - name: workingDirectory
     type: string
 
+  - name: backendKey
+    type: string
+
 stages:
   - stage: Validation
     displayName: "Terraform Static Analysis"
@@ -104,3 +107,4 @@ stages:
           - template: tf-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              backendKey: ${{ parameters.backendKey }}
