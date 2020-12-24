@@ -39,6 +39,17 @@ parameters:
     type: string
     default: 0.5.0
 
+  - name: preInitSteps
+    type: stepList
+    default: []
+
+  - name: postInitSteps
+    type: stepList
+    default: []
+
+  - name: workingDirectory
+    type: string
+
 stages:
   - stage: Validation
     displayName: "Terraform Static Analysis"
@@ -73,3 +84,17 @@ stages:
               installTFLint: ${{ parameters.installTFLint }}
               tflintVersion: ${{ parameters.tflintVersion }}
               tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
+
+          - ${{ each step in parameters.preInitSteps }}:
+              - ${{ step }}
+
+          - template: tf-init.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+
+          - ${{ each step in parameters.postInitSteps }}:
+              - ${{ step }}
+
+          - template: tf-validate.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
