@@ -62,7 +62,7 @@ stages:
           clean: all
         steps:
           - checkout: self
-            presistCredentials: true
+            persistCredentials: true
 
           - task: Bash@3
             displayName: "[terraform install]"
