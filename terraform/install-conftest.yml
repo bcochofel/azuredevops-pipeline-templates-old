@@ -1,10 +1,13 @@
 parameters:
+  - name: installConftest
+    type: boolean
   - name: conftestVersion
     type: string
 
 steps:
   - task: Bash@3
     displayName: "[conftest install]"
+    condition: and(succeeded(), eq('${{ parameters.installConftest }}', true))
     inputs:
       targetType: 'inline'
       failOnStderr: true
@@ -18,6 +21,7 @@ steps:
 
   - task: Bash@3
     displayName: "[conftest version]"
+    condition: and(succeeded(), eq('${{ parameters.installConftest }}', true))
     inputs:
       targetType: 'inline'
       failOnStderr: true

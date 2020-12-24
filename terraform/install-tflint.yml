@@ -1,4 +1,6 @@
 parameters:
+  - name: installTFLint
+    type: boolean
   - name: tflintVersion
     type: string
   - name: tflintRulesetAzurermVersion
@@ -7,6 +9,7 @@ parameters:
 steps:
   - task: Bash@3
     displayName: "[tflint install]"
+    condition: and(succeeded(), eq('${{ parameters.installTFLint }}', true))
     inputs:
       targetType: 'inline'
       failOnStderr: true
@@ -29,6 +32,7 @@ steps:
 
   - task: Bash@3
     displayName: "[tflint version]"
+    condition: and(succeeded(), eq('${{ parameters.installTFLint }}', true))
     inputs:
       targetType: 'inline'
       failOnStderr: true
