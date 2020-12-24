@@ -1,0 +1,26 @@
+parameters:
+  - name: terraformVersion
+    type: string
+
+steps:
+  - task: Bash@3
+    displayName: "[terraform install]"
+    inputs:
+      targetType: 'inline'
+      failOnStderr: true
+      script: |
+        set -eu
+        curl -sL https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip --output terraform.zip
+        unzip terraform.zip
+        echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+    env:
+      TF_VER: ${{ parameters.terraformVersion }}
+
+  - task: Bash@3
+    displayName: "[terraform version]"
+    inputs:
+      targetType: 'inline'
+      failOnStderr: true
+      script: |
+        set -eu
+        terraform version

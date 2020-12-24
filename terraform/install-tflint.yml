@@ -1,0 +1,37 @@
+parameters:
+  - name: tflintVersion
+    type: string
+  - name: tflintRulesetAzurermVersion
+    type: string
+
+steps:
+  - task: Bash@3
+    displayName: "[tflint install]"
+    inputs:
+      targetType: 'inline'
+      failOnStderr: true
+      script: |
+        set -eu
+        curl -sL https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VER}/tflint_linux_amd64.zip --output tflint.zip
+        unzip tflint.zip
+        curl -sL https://github.com/terraform-linters/tflint-ruleset-azurerm/releases/download/v${TFLINT_AZURERM_VER}/tflint-ruleset-azurerm_linux_amd64.zip --output tflint-azurerm.zip
+        unzip tflint-azurerm.zip
+        cat << EOF > tflint.hcl
+        plugin "azurerm" {
+          enabled = true
+        }
+        EOF
+        echo "##vso[task.setvariable variable=tflint_plugin_dir;]$(Build.SourcesDirectory)"
+        echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+    env:
+      TFLINT_VER: ${{ parameters.tflintVersion }}
+      TFLINT_AZURERM_VER: ${{ parameters.tflintRulesetAzurermVersion }}
+
+  - task: Bash@3
+    displayName: "[tflint version]"
+    inputs:
+      targetType: 'inline'
+      failOnStderr: true
+      script: |
+        set -eu
+        tflint --config=$(Build.SourcesDirectory)/tflint.hcl --version

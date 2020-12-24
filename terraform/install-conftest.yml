@@ -1,0 +1,26 @@
+parameters:
+  - name: conftestVersion
+    type: string
+
+steps:
+  - task: Bash@3
+    displayName: "[conftest install]"
+    inputs:
+      targetType: 'inline'
+      failOnStderr: true
+      script: |
+        set -eu
+        curl -sL https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VER}/conftest_${CONFTEST_VER}_Linux_x86_64.tar.gz --output conftest.tgz
+        tar zxf conftest.tgz
+        echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
+    env:
+      CONFTEST_VER: ${{ parameters.conftestVersion }}
+
+  - task: Bash@3
+    displayName: "[conftest version]"
+    inputs:
+      targetType: 'inline'
+      failOnStderr: true
+      script: |
+        set -eu
+        conftest --version
