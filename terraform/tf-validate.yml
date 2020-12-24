@@ -1,0 +1,22 @@
+parameters:
+  - name: workingDirectory
+    type: string
+
+steps:
+  - task: Bash@3
+    displayName: "[terraform validate]"
+    inputs:
+      targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        set -eu
+        terraform validate
+
+  - task: Bash@3
+    displayName: "[tflint validate]"
+    inputs:
+      targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        set -eu
+        tflint --config=$(Build.SourcesDirectory)/tflint.hcl --module .

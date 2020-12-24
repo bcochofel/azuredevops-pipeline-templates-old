@@ -1,0 +1,20 @@
+parameters:
+  - name: workingDirectory
+    type: string
+
+steps:
+  - task: Bash@3
+    displayName: "[terraform init]"
+    inputs:
+      targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        set -eu
+        terraform init \
+          -backend-config=resource_group_name=${TF_BACKEND_RESOURCE_GROUP_NAME} \
+          -backend-config=storage_account_name=${TF_BACKEND_STORAGE_ACCOUNT_NAME} \
+          -backend-config=container_name=${TF_BACKEND_CONTAINER_NAME} \
+          -backend-config=key=${TF_STATE_KEY}
+    env:
+      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)

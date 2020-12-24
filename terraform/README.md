@@ -18,5 +18,8 @@ The template accepts the following parameters.
 | installTFLint | no | `true` | whether or not to install TFLint. |
 | tflintVersion | no | `0.20.2` | tflint version to install (if `installTFLint` is true) |
 | tflintRulesetAzurermVersion | no | `0.5.0` | AzureRM TFLint Ruleset version. |
+| preInitSteps | no | `[]` | pre terraform init steps. |
+| postInitSteps | no | `[]` | post terraform init steps. |
+| workingDirectory | yes | none | terraform files directory to execute commands. |
 
 (*) See [here](https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pool) for more info.
