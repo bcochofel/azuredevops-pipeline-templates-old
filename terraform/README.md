@@ -21,5 +21,6 @@ The template accepts the following parameters.
 | preInitSteps | no | `[]` | pre terraform init steps. |
 | postInitSteps | no | `[]` | post terraform init steps. |
 | workingDirectory | yes | none | terraform files directory to execute commands. |
+| backendKey | yes | none | terraform remote azure backend key. |
 
 (*) See [here](https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pool) for more info.

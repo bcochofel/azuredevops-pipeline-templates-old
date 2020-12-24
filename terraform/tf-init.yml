@@ -1,6 +1,8 @@
 parameters:
   - name: workingDirectory
     type: string
+  - name: backendKey
+    type: string
 
 steps:
   - task: Bash@3
@@ -18,3 +20,4 @@ steps:
     env:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
+      TF_STATE_KEY: ${{ parameters.backendKey }}
