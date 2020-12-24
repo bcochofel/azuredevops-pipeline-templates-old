@@ -1,0 +1,154 @@
+# Dependencies:
+# - required parameters
+#   - environment (environment to use), type "string"
+#       valid values (must exist on Pipelines/Environments):
+#         - management
+#         - development
+#         - production
+#   - module (module name), type "string"
+#   - variableGroupName (variable group with providers credentials), type "string"
+#   - workingDirectory (directory with the terraform files), type "string"
+#   - backendKey (terraform backend key for the tfstate file), type "string"
+# - optional parameters
+#   - debug (whether or not to debug pipeline), type "boolean", default false
+#   - installTerraform (whether or not to install terraform binary), type "boolean", default true
+#   - terraformVersion (terraform version to install), type "string", default "0.13.4"
+#   - installConftest (whether or not to install conftest binary), type "boolean", default true
+#   - conftestVersion (conftest version to install), type "string", default "0.21.0"
+#   - conftestRepository (conftest repository to checkout), type "string", default "git://Repositories/terraform-compliance@refs/heads/main"
+#   - conftestTerraformRulesFolder (rego files for terraform), type "string", default "terraform-compliance/opa"
+#   - installTFLint (whether or not to install TFLint binary), type "boolean", default true
+#   - tflintVersion (TFLint version to install), type "string", default "0.20.2"
+#   - preInitSteps (list of steps to execute before init cmd), type "stepList", default []
+#   - postInitSteps (list of steps to execute after init cmd), type "stepList", default []
+#   - prePlanSteps (list of steps to execute before plan cmd), type "stepList", default []
+#   - postPlanSteps (list of steps to execute after plan cmd), type "stepList", default []
+#   - planEnvVars (object with environment variables mapping), type "object", default {}
+#   - planExtraArgs (extra arguments for the plan command), type "string", default ""
+#   - terraformPlanFile (terraform plan output filename), type "string", default "tfplan.out"
+#   - terraformJsonPlanFile (terraform plan JSON output filename), type "string", default "/tmp/tfplan.json"
+#   - conftestJsonOutput (conftest JSON output filename), type "string", default "/tmp/terraform-compliance.json"
+
+parameters:
+  - name: environment
+    type: string
+    values:
+      - management
+      - development
+      - production
+
+  - name: module
+    type: string
+
+  - name: variableGroupName
+    type: string
+
+  - name: workingDirectory
+    type: string
+
+  - name: backendKey
+    type: string
+
+  - name: debug
+    type: boolean
+    default: false
+
+  - name: installTerraform
+    type: boolean
+    default: true
+
+  - name: terraformVersion
+    type: string
+    default: 0.13.4
+
+  - name: installConftest
+    type: boolean
+    default: true
+
+  - name: conftestVersion
+    type: string
+    default: 0.21.0
+
+  - name: conftestRepository
+    type: string
+    default: git://Repositories/terraform-compliance@refs/heads/main
+
+  - name: conftestTerraformRulesFolder
+    type: string
+    default: terraform-compliance/opa
+
+  - name: installTFLint
+    type: boolean
+    default: true
+
+  - name: tflintVersion
+    type: string
+    default: 0.20.2
+
+  - name: tflintRulesetAzurermVersion
+    type: string
+    default: 0.5.0
+
+  - name: preInitSteps
+    type: stepList
+    default: []
+
+  - name: postInitSteps
+    type: stepList
+    default: []
+
+  - name: prePlanSteps
+    type: stepList
+    default: []
+
+  - name: postPlanSteps
+    type: stepList
+    default: []
+
+  - name: planEnvVars
+    type: object
+    default: {}
+
+  - name: planExtraArgs
+    type: string
+    default: ""
+
+  - name: terraformPlanFile
+    type: string
+    default: tfplan.out
+
+  - name: terraformJsonPlanFile
+    type: string
+    default: /tmp/tfplan.json
+
+  - name: conftestJsonOutput
+    type: string
+    default: /tmp/terraform-compliance.json
+
+stages:
+  - template: tf-validation.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      module: ${{ parameters.module }}
+      variableGroupName: ${{ parameters.variableGroupName }}
+      workingDirectory: $(Build.Repository.Name)/${{ parameters.workingDirectory }}
+      backendKey: ${{ parameters.backendKey }}
+      debug: ${{ parameters.debug }}
+      installTerraform: ${{ parameters.installTerraform }}
+      terraformVersion: ${{ parameters.terraformVersion }}
+      installConftest: ${{ parameters.installConftest }}
+      conftestVersion: ${{ parameters.conftestVersion }}
+      conftestRepository: ${{ parameters.conftestRepository }}
+      conftestTerraformRulesFolder: ${{ parameters.conftestTerraformRulesFolder }}
+      installTFLint: ${{ parameters.installTFLint }}
+      tflintVersion: ${{ parameters.tflintVersion }}
+      tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
+      preInitSteps: ${{ parameters.preInitSteps }}
+      postInitSteps: ${{ parameters.postInitSteps }}
+      prePlanSteps: ${{ parameters.prePlanSteps }}
+      postPlanSteps: ${{ parameters.postPlanSteps }}
+      planEnvVars: ${{ parameters.planEnvVars }}
+      planExtraArgs: ${{ parameters.planExtraArgs }}
+      terraformPlanFile: ${{ parameters.terraformPlanFile }}
+      terraformJsonPlanFile: ${{ parameters.terraformJsonPlanFile }}
+      conftestJsonOutput: ${{ parameters.conftestJsonOutput }}
