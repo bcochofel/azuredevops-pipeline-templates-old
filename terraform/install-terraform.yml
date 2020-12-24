@@ -10,7 +10,6 @@ steps:
     condition: and(succeeded(), eq('${{ parameters.installTerraform }}', true))
     inputs:
       targetType: 'inline'
-      failOnStderr: true
       script: |
         set -eu
         curl -sL https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip --output terraform.zip
@@ -24,7 +23,6 @@ steps:
     condition: and(succeeded(), eq('${{ parameters.installTerraform }}', true))
     inputs:
       targetType: 'inline'
-      failOnStderr: true
       script: |
         set -eu
         terraform version
