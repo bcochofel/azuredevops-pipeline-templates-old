@@ -1,4 +1,4 @@
-# Terraform Validation
+# Terraform Validation/Deployment
 
 This template does `static analysis` on terraform code.
 
