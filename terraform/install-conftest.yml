@@ -10,7 +10,6 @@ steps:
     condition: and(succeeded(), eq('${{ parameters.installConftest }}', true))
     inputs:
       targetType: 'inline'
-      failOnStderr: true
       script: |
         set -eu
         curl -sL https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VER}/conftest_${CONFTEST_VER}_Linux_x86_64.tar.gz --output conftest.tgz
@@ -24,7 +23,6 @@ steps:
     condition: and(succeeded(), eq('${{ parameters.installConftest }}', true))
     inputs:
       targetType: 'inline'
-      failOnStderr: true
       script: |
         set -eu
         conftest --version

@@ -12,7 +12,6 @@ steps:
     condition: and(succeeded(), eq('${{ parameters.installTFLint }}', true))
     inputs:
       targetType: 'inline'
-      failOnStderr: true
       script: |
         set -eu
         curl -sL https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VER}/tflint_linux_amd64.zip --output tflint.zip
@@ -35,7 +34,6 @@ steps:
     condition: and(succeeded(), eq('${{ parameters.installTFLint }}', true))
     inputs:
       targetType: 'inline'
-      failOnStderr: true
       script: |
         set -eu
         tflint --config=$(Build.SourcesDirectory)/tflint.hcl --version
