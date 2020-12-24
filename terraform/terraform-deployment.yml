@@ -100,6 +100,7 @@ stages:
           - template: tf-init.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              backendKey: ${{ parameters.backendKey }}
 
           - ${{ each step in parameters.postInitSteps }}:
               - ${{ step }}
@@ -107,4 +108,3 @@ stages:
           - template: tf-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
-              backendKey: ${{ parameters.backendKey }}
