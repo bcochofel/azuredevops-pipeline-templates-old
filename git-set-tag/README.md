@@ -10,4 +10,6 @@ None.
 
 ## Optional
 
-* workingDirectory: sets the working directory to execute commands, default `$(Build.SourcesDirectory)`
+| parameter | description | default |
+| --------- | ----------- | ------- |
+| workingDirectory | sets the working directory to execute commands | `$(Build.SourcesDirectory)` |
