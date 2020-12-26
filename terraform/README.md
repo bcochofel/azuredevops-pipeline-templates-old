@@ -19,6 +19,7 @@ The template accepts the following parameters.
 | tflintVersion | no | `0.20.2` | tflint version to install (if `installTFLint` is true) |
 | tflintRulesetAzurermVersion | no | `0.5.0` | AzureRM TFLint Ruleset version. |
 | workingDirectory | yes | none | terraform files directory to execute commands. |
+| prComments | no | `true` | whether or not tp do Azure DevOps PR comments for terraform plan. |
 | backendKey | yes | none | terraform remote azure backend key. |
 | preInitSteps | no | `[]` | pre terraform init steps. |
 | postInitSteps | no | `[]` | post terraform init steps. |
@@ -37,3 +38,83 @@ The template accepts the following parameters.
 
 (*) See [here](https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pool) for more info.
 (**) If you want to approve before deploy use one of the [Azure DevOps environments](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops) and apply the rules you want.
+
+# Examples
+
+## Pipeline for Terraform Static Analysis
+
+```yaml
+name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
+
+trigger: none
+pr:
+  branches:
+    include:
+      - '*'
+  paths:
+    include:
+      - examples/network
+    exclude:
+      - examples/network/README.md
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: bcochofel/azuredevops-pipeline-templates
+      ref: refs/heads/main
+      endpoint: GitHubConnection
+
+stages:
+  - template: terraform/terraform.yml@templates
+    parameters:
+      environment: sandbox
+      validationOnly: true
+      varGroups:
+        - terraform-configuration
+        - terraform-configuration-secrets
+      workingDirectory: examples/network
+      prComments: false
+      backendKey: example-network.tfstate
+```
+
+**NOTE:** The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+
+## Pipeline for Terraform Deployment
+
+```yaml
+name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - master
+      - main
+  paths:
+    include:
+      - examples/network
+    exclude:
+      - examples/network/README.md
+pr: none
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: bcochofel/azuredevops-pipeline-templates
+      ref: refs/heads/main
+      endpoint: GitHubConnection
+
+stages:
+  - template: terraform/terraform.yml@templates
+    parameters:
+      environment: sandbox
+      varGroups:
+        - terraform-configuration
+        - terraform-configuration-secrets
+      workingDirectory: examples/network
+      prComments: false
+      backendKey: example-network.tfstate
+```
+
+**NOTE:** The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.

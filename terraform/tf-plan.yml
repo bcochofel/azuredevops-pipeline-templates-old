@@ -2,6 +2,9 @@ parameters:
   - name: workingDirectory
     type: string
 
+  - name: prComments
+    type: boolean
+
   - name: planEnvVars
     type: object
 
@@ -56,7 +59,7 @@ steps:
 
   - task: PowerShell@2
     displayName: "[pr comments from terraform plan]"
-    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    condition: and(succeeded(), eq('${{ parameters.prComments }}', true), eq(variables['Build.Reason'], 'PullRequest'))
     inputs:
       targetType: 'inline'
       workingDirectory: ${{ parameters.workingDirectory }}
