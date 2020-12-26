@@ -45,6 +45,10 @@ parameters:
   - name: backendKey
     type: string
 
+  - name: prComments
+    type: boolean
+    default: true
+
   - name: preInitSteps
     type: stepList
     default: []
@@ -155,6 +159,7 @@ stages:
           - template: tf-plan.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              prComments: ${{ parameters.prComments }}
               planEnvVars: ${{ parameters.planEnvVars }}
               planExtraArgs: ${{ parameters.planExtraArgs }}
               tfPlanFile: ${{ parameters.tfPlanFile }}
