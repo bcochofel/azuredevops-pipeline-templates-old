@@ -59,6 +59,7 @@ steps:
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
     inputs:
       targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
       script: |
         Write-Host "JSON plan path: (${env:TF_JSON_PATH})"
         $json = Get-Content -Path ${env:TF_JSON_PATH} | ConvertFrom-Json
