@@ -5,6 +5,9 @@ parameters:
     type: string
 
 steps:
+  - ${{ each step in parameters.preInitSteps }}:
+      - ${{ step }}
+
   - task: Bash@3
     displayName: "[terraform init]"
     inputs:
@@ -21,3 +24,6 @@ steps:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
       TF_STATE_KEY: ${{ parameters.backendKey }}
+
+  - ${{ each step in parameters.postInitSteps }}:
+      - ${{ step }}
