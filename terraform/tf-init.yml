@@ -3,6 +3,10 @@ parameters:
     type: string
   - name: backendKey
     type: string
+  - name: preInitSteps
+    type: stepList
+  - name: postInitSteps
+    type: stepList
 
 steps:
   - ${{ each step in parameters.preInitSteps }}:
