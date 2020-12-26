@@ -39,6 +39,12 @@ parameters:
     type: string
     default: 0.5.0
 
+  - name: workingDirectory
+    type: string
+
+  - name: backendKey
+    type: string
+
   - name: preInitSteps
     type: stepList
     default: []
@@ -47,11 +53,52 @@ parameters:
     type: stepList
     default: []
 
-  - name: workingDirectory
+  - name: planEnvVars
+    type: object
+    default: {}
+
+  - name: planExtraArgs
+    type: string
+    default: ""
+
+  - name: tfPlanFile
+    type: string
+    default: ".terraform/tfplan.out"
+
+  - name: tfJSONFile
+    type: string
+    default: ".terraform/tfplan.out.json"
+
+  - name: prePlanSteps
+    type: stepList
+    default: []
+
+  - name: postPlanSteps
+    type: stepList
+    default: []
+
+  - name: environment
     type: string
 
-  - name: backendKey
+  - name: validationOnly
+    type: boolean
+    default: false
+
+  - name: applyEnvVars
+    type: object
+    default: {}
+
+  - name: applyExtraArgs
     type: string
+    default: ""
+
+  - name: preApplySteps
+    type: stepList
+    default: []
+
+  - name: postApplySteps
+    type: stepList
+    default: []
 
 stages:
   - stage: Validation
@@ -61,6 +108,8 @@ stages:
           - group: ${{ vg }}
       - name: System.Debug
         value: ${{ parameters.debug }}
+      - name: artifact_name
+        value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:
       - job: Validation
         displayName: "Terraform Static Analysis"
@@ -88,17 +137,82 @@ stages:
               tflintVersion: ${{ parameters.tflintVersion }}
               tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
 
-          - ${{ each step in parameters.preInitSteps }}:
-              - ${{ step }}
-
           - template: tf-init.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
               backendKey: ${{ parameters.backendKey }}
 
-          - ${{ each step in parameters.postInitSteps }}:
-              - ${{ step }}
-
           - template: tf-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+
+          - template: tflint.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+
+          - template: tf-plan.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+              planEnvVars: ${{ parameters.planEnvVars }}
+              planExtraArgs: ${{ parameters.planExtraArgs }}
+              tfPlanFile: ${{ parameters.tfPlanFile }}
+              tfJSONFile: ${{ parameters.tfJSONFile }}
+              prePlanSteps: ${{ parameters.prePlanSteps }}
+              postPlanSteps: ${{ parameters.postPlanSteps }}
+
+          - template: conftest.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "${{ parameters.workingDirectory }}/.terraform"
+              artifactName: $(artifact_name)
+
+  - stage: Deploy
+    dependsOn: [Validation]
+    displayName: "Terraform Deployment"
+    variables:
+      - ${{ each vg in parameters.varGroups }}:
+          - group: ${{ vg }}
+      - name: System.Debug
+        value: ${{ parameters.debug }}
+      - name: artifact_name
+        value: ${{ parameters.environment }}-plan-$(Build.BuildID)
+    jobs:
+      - deployment: Deploy
+        displayName: "Terraform Deployment"
+        environment: ${{ parameters.environment }}
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        condition: and(succeeded(), eq('${{ parameters.validationOnly }}', false), in(variables['Build.SourceBranchName'], 'master', 'main'))
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  persistCredentials: true
+                - download: none
+
+                - template: install-terraform.yml
+                  parameters:
+                    installTerraform: ${{ parameters.installTerraform }}
+                    terraformVersion: ${{ parameters.terraformVersion }}
+
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifact: $(artifact_name)
+                    path: "${{ parameters.workingDirectory }}/.terraform"
+
+                - template: tf-apply.yml
+                  parameters:
+                    workingDirectory: ${{ parameters.workingDirectory }}
+                    applyEnvVars: ${{ parameters.applyEnvVars }}
+                    applyExtraArgs: ${{ parameters.applyExtraArgs }}
+                    tfPlanFile: ${{ parameters.tfPlanFile }}
+                    preApplySteps: ${{ parameters.preApplySteps }}
+                    postApplySteps: ${{ parameters.postApplySteps }}
+
+                - template: ../git-set-tag/git-set-tag.yml
+                  parameters:
+                    workingDirectory: ${{ parameters.workingDirectory }}

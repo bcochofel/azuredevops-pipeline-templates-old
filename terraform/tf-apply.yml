@@ -1,0 +1,40 @@
+parameters:
+  - name: workingDirectory
+    type: string
+
+  - name: applyEnvVars
+    type: object
+
+  - name: applyExtraArgs
+    type: string
+
+  - name: tfPlanFile
+    type: string
+
+  - name: preApplySteps
+    type: stepList
+
+  - name: postApplySteps
+    type: stepList
+
+steps:
+  - ${{ each step in parameters.preApplySteps }}:
+      - ${{ step }}
+
+  - task: Bash@3
+    displayName: "[terraform apply]"
+    inputs:
+      targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        set -eu
+        chmod -R +x .terraform/plugins
+        terraform apply -input=false -auto-approve ${{ parameters.tfPlanFile }} ${{ parameters.applyExtraArgs }}
+    env:
+      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
+      ${{ each envVar in parameters.applyEnvVars }}:
+        ${{ envVar.key }}: ${{ envVar.Value }}
+
+  - ${{ each step in parameters.postApplySteps }}:
+      - ${{ step }}
