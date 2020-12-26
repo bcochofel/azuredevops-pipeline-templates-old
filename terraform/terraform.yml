@@ -141,6 +141,8 @@ stages:
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
               backendKey: ${{ parameters.backendKey }}
+              preInitSteps: ${{ parameters.preInitSteps }}
+              postInitSteps: ${{ parameters.postInitSteps }}
 
           - template: tf-validate.yml
             parameters:
