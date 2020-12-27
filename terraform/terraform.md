@@ -19,17 +19,16 @@ The template accepts the following parameters.
 | tflintVersion | no | `0.20.2` | tflint version to install (if `installTFLint` is true) |
 | tflintRulesetAzurermVersion | no | `0.5.0` | AzureRM TFLint Ruleset version. |
 | workingDirectory | yes | none | terraform files directory to execute commands. |
+| environmentVars | no | `{}` | environment variables to be added. |
 | prComments | no | `true` | whether or not tp do Azure DevOps PR comments for terraform plan. |
 | backendKey | yes | none | terraform remote azure backend key. |
 | preInitSteps | no | `[]` | pre terraform init steps. |
 | postInitSteps | no | `[]` | post terraform init steps. |
-| planEnvVars | no | `{}` | environment variables for terraform plan command. |
 | planExtraArgs | no | `null` | extra arguments for terraform plan command. |
 | prePlanSteps | no | `[]` | pre terraform plan steps. |
 | postPlanSteps | no | `[]` | post terraform plan steps. |
 | environment | yes | `null` | environment to deploy infrastructure. (**) |
 | validationOnly | no | `false` | set to true if you only want to execute the validation stage. |
-| applyEnvVars | no | `{}` | environment variables for terraform apply command. |
 | applyExtraArgs | no | `null` | extra arguments for terraform apply command. |
 | preApplySteps | no | `[]` | pre terraform apply steps. |
 | postApplySteps | no | `[]` | post terraform apply steps. |

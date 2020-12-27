@@ -54,6 +54,10 @@ parameters:
   - name: workingDirectory
     type: string
 
+  - name: environmentVars
+    type: object
+    default: {}
+
   - name: prComments
     type: boolean
     default: true
@@ -65,10 +69,6 @@ parameters:
   - name: postInitSteps
     type: stepList
     default: []
-
-  - name: planEnvVars
-    type: object
-    default: {}
 
   - name: planExtraArgs
     type: string
@@ -88,10 +88,6 @@ parameters:
   - name: validationOnly
     type: boolean
     default: false
-
-  - name: applyEnvVars
-    type: object
-    default: {}
 
   - name: applyExtraArgs
     type: string
@@ -154,14 +150,15 @@ stages:
           - template: terragrunt-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              environmentVars: ${{ parameters.environmentVars }}
               runAll: ${{ parameters.terragruntRunAll }}
 
           - template: terragrunt-plan.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              environmentVars: ${{ parameters.environmentVars }}
               runAll: ${{ parameters.terragruntRunAll }}
               prComments: ${{ parameters.prComments }}
-              planEnvVars: ${{ parameters.planEnvVars }}
               planExtraArgs: ${{ parameters.planExtraArgs }}
               tfPlanFile: $(tfPlanFile)
               tfJSONFile: $(tfJsonFile)
@@ -224,8 +221,8 @@ stages:
                 - template: terragrunt-apply.yml
                   parameters:
                     workingDirectory: ${{ parameters.workingDirectory }}
+                    environmentVars: ${{ parameters.environmentVars }}
                     runAll: ${{ parameters.terragruntRunAll }}
-                    applyEnvVars: ${{ parameters.applyEnvVars }}
                     applyExtraArgs: ${{ parameters.applyExtraArgs }}
                     tfPlanFile: $(tfPlanFile)
                     preApplySteps: ${{ parameters.preApplySteps }}

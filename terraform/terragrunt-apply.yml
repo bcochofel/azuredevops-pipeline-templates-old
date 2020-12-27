@@ -2,11 +2,11 @@ parameters:
   - name: workingDirectory
     type: string
 
+  - name: environmentVars
+    type: object
+
   - name: runAll
     type: boolean
-
-  - name: applyEnvVars
-    type: object
 
   - name: applyExtraArgs
     type: string
@@ -36,7 +36,7 @@ steps:
     env:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
-      ${{ each envVar in parameters.applyEnvVars }}:
+      ${{ each envVar in parameters.environmentVars }}:
         ${{ envVar.key }}: ${{ envVar.Value }}
 
   - task: Bash@3
@@ -51,7 +51,7 @@ steps:
     env:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
-      ${{ each envVar in parameters.applyEnvVars }}:
+      ${{ each envVar in parameters.environmentVars }}:
         ${{ envVar.key }}: ${{ envVar.Value }}
 
   - ${{ each step in parameters.postApplySteps }}:

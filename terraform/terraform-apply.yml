@@ -2,7 +2,7 @@ parameters:
   - name: workingDirectory
     type: string
 
-  - name: applyEnvVars
+  - name: environmentVars
     type: object
 
   - name: applyExtraArgs
@@ -33,7 +33,7 @@ steps:
     env:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
-      ${{ each envVar in parameters.applyEnvVars }}:
+      ${{ each envVar in parameters.environmentVars }}:
         ${{ envVar.key }}: ${{ envVar.Value }}
 
   - ${{ each step in parameters.postApplySteps }}:
