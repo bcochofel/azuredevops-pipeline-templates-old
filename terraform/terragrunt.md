@@ -66,7 +66,7 @@ resources:
       endpoint: GitHubConnection
 
 stages:
-  - template: terraform/terraform.yml@templates
+  - template: terraform/terragrunt.yml@templates
     parameters:
       environment: sandbox
       validationOnly: true
@@ -75,10 +75,12 @@ stages:
         - terraform-configuration-secrets
       workingDirectory: examples/network
       prComments: false
-      backendKey: example-network.tfstate
+      terragruntRunAll: false
 ```
 
-**NOTE:** The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+**NOTES:**
+* The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+* The `terragruntRunAll` can be set to `true` to deploy all the modules in a region or environment.
 
 ## Pipeline for Terraform Deployment
 
@@ -106,7 +108,7 @@ resources:
       endpoint: GitHubConnection
 
 stages:
-  - template: terraform/terraform.yml@templates
+  - template: terraform/terragrunt.yml@templates
     parameters:
       environment: sandbox
       varGroups:
@@ -114,7 +116,9 @@ stages:
         - terraform-configuration-secrets
       workingDirectory: examples/network
       prComments: false
-      backendKey: example-network.tfstate
+      terragruntRunAll: false
 ```
 
-**NOTE:** The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+**NOTES:**
+* The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+* The `terragruntRunAll` can be set to `true` to deploy all the modules in a region or environment.
