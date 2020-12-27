@@ -114,9 +114,9 @@ stages:
       - name: System.Debug
         value: ${{ parameters.debug }}
       - name: tfPlanFile
-        value: "/tmp/tfplan.out"
+        value: ".terragrunt-cache/tfplan.out"
       - name: tfJsonFile
-        value: "/tmp/tfplan.out.json"
+        value: ".terragrunt-cache/tfplan.out.json"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:
@@ -156,6 +156,27 @@ stages:
               workingDirectory: ${{ parameters.workingDirectory }}
               runAll: ${{ parameters.terragruntRunAll }}
 
+          - template: terragrunt-plan.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+              runAll: ${{ parameters.terragruntRunAll }}
+              prComments: ${{ parameters.prComments }}
+              planEnvVars: ${{ parameters.planEnvVars }}
+              planExtraArgs: ${{ parameters.planExtraArgs }}
+              tfPlanFile: $(tfPlanFile)
+              tfJSONFile: $(tfJsonFile)
+              prePlanSteps: ${{ parameters.prePlanSteps }}
+              postPlanSteps: ${{ parameters.postPlanSteps }}
+
+          - template: conftest.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "${{ parameters.workingDirectory }}/.terragrunt-cache"
+              artifactName: $(artifact_name)
+
   - stage: Deploy
     dependsOn: [Validation]
     displayName: "Terraform Deployment"
@@ -194,3 +215,22 @@ stages:
                   parameters:
                     installTerragrunt: ${{ parameters.installTerragrunt }}
                     terragruntVersion: ${{ parameters.terragruntVersion }}
+
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifact: $(artifact_name)
+                    path: "${{ parameters.workingDirectory }}/.terragrunt-cache"
+
+                - template: terragrunt-apply.yml
+                  parameters:
+                    workingDirectory: ${{ parameters.workingDirectory }}
+                    runAll: ${{ parameters.terragruntRunAll }}
+                    applyEnvVars: ${{ parameters.applyEnvVars }}
+                    applyExtraArgs: ${{ parameters.applyExtraArgs }}
+                    tfPlanFile: $(tfPlanFile)
+                    preApplySteps: ${{ parameters.preApplySteps }}
+                    postApplySteps: ${{ parameters.postApplySteps }}
+
+                - template: ../git-set-tag/git-set-tag.yml
+                  parameters:
+                    workingDirectory: ${{ parameters.workingDirectory }}

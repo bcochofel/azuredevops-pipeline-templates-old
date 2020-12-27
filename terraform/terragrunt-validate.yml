@@ -1,6 +1,7 @@
 parameters:
   - name: workingDirectory
     type: string
+
   - name: runAll
     type: boolean
 
