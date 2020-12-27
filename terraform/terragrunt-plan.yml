@@ -2,14 +2,14 @@ parameters:
   - name: workingDirectory
     type: string
 
+  - name: environmentVars
+    type: object
+
   - name: runAll
     type: boolean
 
   - name: prComments
     type: boolean
-
-  - name: planEnvVars
-    type: object
 
   - name: planExtraArgs
     type: string
@@ -43,7 +43,7 @@ steps:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
       # add custom environment variables for plan
-      ${{ each envVar in parameters.planEnvVars }}:
+      ${{ each envVar in parameters.environmentVars }}:
         ${{ envVar.key }}: ${{ envVar.Value }}
 
   - task: Bash@3
@@ -59,7 +59,7 @@ steps:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
       # add custom environment variables for plan
-      ${{ each envVar in parameters.planEnvVars }}:
+      ${{ each envVar in parameters.environmentVars }}:
         ${{ envVar.key }}: ${{ envVar.Value }}
 
   - task: Bash@3

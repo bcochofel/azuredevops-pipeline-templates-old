@@ -1,10 +1,16 @@
 parameters:
   - name: workingDirectory
     type: string
+
+  - name: environmentVars
+    type: object
+
   - name: backendKey
     type: string
+
   - name: preInitSteps
     type: stepList
+
   - name: postInitSteps
     type: stepList
 
@@ -28,6 +34,9 @@ steps:
       ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
       AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
       TF_STATE_KEY: ${{ parameters.backendKey }}
+      # add custom environment variables for plan
+      ${{ each envVar in parameters.environmentVars }}:
+        ${{ envVar.key }}: ${{ envVar.Value }}
 
   - ${{ each step in parameters.postInitSteps }}:
       - ${{ step }}

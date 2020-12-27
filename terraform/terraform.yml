@@ -42,6 +42,10 @@ parameters:
   - name: workingDirectory
     type: string
 
+  - name: environmentVars
+    type: object
+    default: {}
+
   - name: backendKey
     type: string
 
@@ -56,10 +60,6 @@ parameters:
   - name: postInitSteps
     type: stepList
     default: []
-
-  - name: planEnvVars
-    type: object
-    default: {}
 
   - name: planExtraArgs
     type: string
@@ -79,10 +79,6 @@ parameters:
   - name: validationOnly
     type: boolean
     default: false
-
-  - name: applyEnvVars
-    type: object
-    default: {}
 
   - name: applyExtraArgs
     type: string
@@ -140,6 +136,7 @@ stages:
           - template: terraform-init.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              environmentVars: ${{ parameters.environmentVars }}
               backendKey: ${{ parameters.backendKey }}
               preInitSteps: ${{ parameters.preInitSteps }}
               postInitSteps: ${{ parameters.postInitSteps }}
@@ -147,12 +144,13 @@ stages:
           - template: terraform-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              environmentVars: ${{ parameters.environmentVars }}
 
           - template: terraform-plan.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              environmentVars: ${{ parameters.environmentVars }}
               prComments: ${{ parameters.prComments }}
-              planEnvVars: ${{ parameters.planEnvVars }}
               planExtraArgs: ${{ parameters.planExtraArgs }}
               tfPlanFile: $(tfPlanFile)
               tfJSONFile: $(tfJsonFile)
@@ -210,7 +208,7 @@ stages:
                 - template: terraform-apply.yml
                   parameters:
                     workingDirectory: ${{ parameters.workingDirectory }}
-                    applyEnvVars: ${{ parameters.applyEnvVars }}
+                    environmentVars: ${{ parameters.environmentVars }}
                     applyExtraArgs: ${{ parameters.applyExtraArgs }}
                     tfPlanFile: $(tfPlanFile)
                     preApplySteps: ${{ parameters.preApplySteps }}

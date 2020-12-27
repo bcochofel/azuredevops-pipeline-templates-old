@@ -22,16 +22,15 @@ The template accepts the following parameters.
 | terragruntVersion | no | `0.26.7` | terragrunt version to install (if `installTerragrunt` is true) |
 | terragruntRunAll | no | `false` | whether or not the execute `validate-all plan-all apply-all` commands. |
 | workingDirectory | yes | none | terraform files directory to execute commands. |
+| environmentVars | no | `{}` | environment variables to be added. |
 | prComments | no | `true` | whether or not tp do Azure DevOps PR comments for terraform plan. |
 | preInitSteps | no | `[]` | pre terraform init steps. |
 | postInitSteps | no | `[]` | post terraform init steps. |
-| planEnvVars | no | `{}` | environment variables for terraform plan command. |
 | planExtraArgs | no | `null` | extra arguments for terraform plan command. |
 | prePlanSteps | no | `[]` | pre terraform plan steps. |
 | postPlanSteps | no | `[]` | post terraform plan steps. |
 | environment | yes | `null` | environment to deploy infrastructure. (**) |
 | validationOnly | no | `false` | set to true if you only want to execute the validation stage. |
-| applyEnvVars | no | `{}` | environment variables for terraform apply command. |
 | applyExtraArgs | no | `null` | extra arguments for terraform apply command. |
 | preApplySteps | no | `[]` | pre terraform apply steps. |
 | postApplySteps | no | `[]` | post terraform apply steps. |
