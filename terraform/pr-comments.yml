@@ -5,58 +5,10 @@ parameters:
   - name: prComments
     type: boolean
 
-  - name: planEnvVars
-    type: object
-
-  - name: planExtraArgs
-    type: string
-
-  - name: tfPlanFile
-    type: string
-
   - name: tfJSONFile
     type: string
 
-  - name: prePlanSteps
-    type: stepList
-
-  - name: postPlanSteps
-    type: stepList
-
 steps:
-  - ${{ each step in parameters.prePlanSteps }}:
-      - ${{ step }}
-
-  - task: Bash@3
-    displayName: "[terraform plan]"
-    inputs:
-      targetType: 'inline'
-      workingDirectory: ${{ parameters.workingDirectory }}
-      script: |
-        set -eu
-        terraform plan -input=false -out=${{ parameters.tfPlanFile }} ${{ parameters.planExtraArgs }}
-    env:
-      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-      AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
-      # add custom environment variables for plan
-      ${{ each envVar in parameters.planEnvVars }}:
-        ${{ envVar.key }}: ${{ envVar.Value }}
-
-  - task: Bash@3
-    displayName: "[terraform show]"
-    inputs:
-      targetType: 'inline'
-      workingDirectory: ${{ parameters.workingDirectory }}
-      script: |
-        set -eu
-        terraform show -no-color -json ${{ parameters.tfPlanFile }} > ${{ parameters.tfJSONFile }}
-    env:
-      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-      AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
-
-  - ${{ each step in parameters.postPlanSteps }}:
-      - ${{ step }}
-
   - task: PowerShell@2
     displayName: "[pr comments from terraform plan]"
     condition: and(succeeded(), eq('${{ parameters.prComments }}', true), eq(variables['Build.Reason'], 'PullRequest'))

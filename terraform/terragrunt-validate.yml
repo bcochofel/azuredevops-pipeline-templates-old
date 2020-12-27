@@ -1,0 +1,27 @@
+parameters:
+  - name: workingDirectory
+    type: string
+
+  - name: runAll
+    type: boolean
+
+steps:
+  - task: Bash@3
+    displayName: "[terragrunt validate]"
+    condition: and(succeeded(), eq('${{ parameters.runAll }}', false))
+    inputs:
+      targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        set -eu
+        terragrunt validate
+
+  - task: Bash@3
+    displayName: "[terragrunt validate-all]"
+    condition: and(succeeded(), eq('${{ parameters.runAll }}', true))
+    inputs:
+      targetType: 'inline'
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        set -eu
+        terragrunt validate-all

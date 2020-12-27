@@ -39,10 +39,19 @@ parameters:
     type: string
     default: 0.5.0
 
-  - name: workingDirectory
-    type: string
+  - name: installTerragrunt
+    type: boolean
+    default: true
 
-  - name: backendKey
+  - name: terragruntVersion
+    type: string
+    default: 0.26.7
+
+  - name: terragruntRunAll
+    type: boolean
+    default: false
+
+  - name: workingDirectory
     type: string
 
   - name: prComments
@@ -105,9 +114,9 @@ stages:
       - name: System.Debug
         value: ${{ parameters.debug }}
       - name: tfPlanFile
-        value: ".terraform/tfplan.out"
+        value: ".terragrunt-cache/tfplan.out"
       - name: tfJsonFile
-        value: ".terraform/tfplan.out.json"
+        value: ".terragrunt-cache/tfplan.out.json"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:
@@ -137,20 +146,20 @@ stages:
               tflintVersion: ${{ parameters.tflintVersion }}
               tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
 
-          - template: terraform-init.yml
+          - template: install-terragrunt.yml
             parameters:
-              workingDirectory: ${{ parameters.workingDirectory }}
-              backendKey: ${{ parameters.backendKey }}
-              preInitSteps: ${{ parameters.preInitSteps }}
-              postInitSteps: ${{ parameters.postInitSteps }}
+              installTerragrunt: ${{ parameters.installTerragrunt }}
+              terragruntVersion: ${{ parameters.terragruntVersion }}
 
-          - template: terraform-validate.yml
+          - template: terragrunt-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              runAll: ${{ parameters.terragruntRunAll }}
 
-          - template: terraform-plan.yml
+          - template: terragrunt-plan.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
+              runAll: ${{ parameters.terragruntRunAll }}
               prComments: ${{ parameters.prComments }}
               planEnvVars: ${{ parameters.planEnvVars }}
               planExtraArgs: ${{ parameters.planExtraArgs }}
@@ -165,7 +174,7 @@ stages:
 
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: "${{ parameters.workingDirectory }}/.terraform"
+              targetPath: "${{ parameters.workingDirectory }}/.terragrunt-cache"
               artifactName: $(artifact_name)
 
   - stage: Deploy
@@ -177,9 +186,9 @@ stages:
       - name: System.Debug
         value: ${{ parameters.debug }}
       - name: tfPlanFile
-        value: ".terraform/${{ parameters.tfPlanFile }}"
+        value: "/tmp/${{ parameters.tfPlanFile }}"
       - name: tfJsonFile
-        value: ".terraform/${{ parameters.tfJSONFile }}"
+        value: "/tmp/${{ parameters.tfJSONFile }}"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:
@@ -202,14 +211,20 @@ stages:
                     installTerraform: ${{ parameters.installTerraform }}
                     terraformVersion: ${{ parameters.terraformVersion }}
 
+                - template: install-terragrunt.yml
+                  parameters:
+                    installTerragrunt: ${{ parameters.installTerragrunt }}
+                    terragruntVersion: ${{ parameters.terragruntVersion }}
+
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     artifact: $(artifact_name)
-                    path: "${{ parameters.workingDirectory }}/.terraform"
+                    path: "${{ parameters.workingDirectory }}/.terragrunt-cache"
 
-                - template: terraform-apply.yml
+                - template: terragrunt-apply.yml
                   parameters:
                     workingDirectory: ${{ parameters.workingDirectory }}
+                    runAll: ${{ parameters.terragruntRunAll }}
                     applyEnvVars: ${{ parameters.applyEnvVars }}
                     applyExtraArgs: ${{ parameters.applyExtraArgs }}
                     tfPlanFile: $(tfPlanFile)
