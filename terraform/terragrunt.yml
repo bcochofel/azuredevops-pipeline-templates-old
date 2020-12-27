@@ -1,0 +1,187 @@
+parameters:
+  - name: debug
+    type: boolean
+    default: false
+
+  - name: varGroups
+    type: object
+    default: {}
+
+  - name: vmImage
+    type: string
+    default: 'ubuntu-latest'
+
+  - name: installTerraform
+    type: boolean
+    default: true
+
+  - name: terraformVersion
+    type: string
+    default: 0.13.4
+
+  - name: installConftest
+    type: boolean
+    default: true
+
+  - name: conftestVersion
+    type: string
+    default: 0.21.0
+
+  - name: installTFLint
+    type: boolean
+    default: true
+
+  - name: tflintVersion
+    type: string
+    default: 0.20.2
+
+  - name: tflintRulesetAzurermVersion
+    type: string
+    default: 0.5.0
+
+  - name: installTerragrunt
+    type: boolean
+    default: true
+
+  - name: terragruntVersion
+    type: string
+    default: 0.26.7
+
+  - name: workingDirectory
+    type: string
+
+  - name: prComments
+    type: boolean
+    default: true
+
+  - name: preInitSteps
+    type: stepList
+    default: []
+
+  - name: postInitSteps
+    type: stepList
+    default: []
+
+  - name: planEnvVars
+    type: object
+    default: {}
+
+  - name: planExtraArgs
+    type: string
+    default: ""
+
+  - name: tfPlanFile
+    type: string
+    default: ".terraform/tfplan.out"
+
+  - name: tfJSONFile
+    type: string
+    default: ".terraform/tfplan.out.json"
+
+  - name: prePlanSteps
+    type: stepList
+    default: []
+
+  - name: postPlanSteps
+    type: stepList
+    default: []
+
+  - name: environment
+    type: string
+
+  - name: validationOnly
+    type: boolean
+    default: false
+
+  - name: applyEnvVars
+    type: object
+    default: {}
+
+  - name: applyExtraArgs
+    type: string
+    default: ""
+
+  - name: preApplySteps
+    type: stepList
+    default: []
+
+  - name: postApplySteps
+    type: stepList
+    default: []
+
+stages:
+  - stage: Validation
+    displayName: "Terraform Static Analysis"
+    variables:
+      - ${{ each vg in parameters.varGroups }}:
+          - group: ${{ vg }}
+      - name: System.Debug
+        value: ${{ parameters.debug }}
+      - name: artifact_name
+        value: ${{ parameters.environment }}-plan-$(Build.BuildID)
+    jobs:
+      - job: Validation
+        displayName: "Terraform Static Analysis"
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        workspace:
+          clean: all
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - template: install-terraform.yml
+            parameters:
+              installTerraform: ${{ parameters.installTerraform }}
+              terraformVersion: ${{ parameters.terraformVersion }}
+
+          - template: install-conftest.yml
+            parameters:
+              installConftest: ${{ parameters.installConftest }}
+              conftestVersion: ${{ parameters.conftestVersion }}
+
+          - template: install-tflint.yml
+            parameters:
+              installTFLint: ${{ parameters.installTFLint }}
+              tflintVersion: ${{ parameters.tflintVersion }}
+              tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
+
+          - template: install-terragrunt.yml
+            parameters:
+              installTerragrunt: ${{ parameters.installTerragrunt }}
+              terragruntVersion: ${{ parameters.terragruntVersion }}
+
+  - stage: Deploy
+    dependsOn: [Validation]
+    displayName: "Terraform Deployment"
+    variables:
+      - ${{ each vg in parameters.varGroups }}:
+          - group: ${{ vg }}
+      - name: System.Debug
+        value: ${{ parameters.debug }}
+      - name: artifact_name
+        value: ${{ parameters.environment }}-plan-$(Build.BuildID)
+    jobs:
+      - deployment: Deploy
+        displayName: "Terraform Deployment"
+        environment: ${{ parameters.environment }}
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        condition: and(succeeded(), eq('${{ parameters.validationOnly }}', false), in(variables['Build.SourceBranchName'], 'master', 'main'))
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  persistCredentials: true
+                - download: none
+
+                - template: install-terraform.yml
+                  parameters:
+                    installTerraform: ${{ parameters.installTerraform }}
+                    terraformVersion: ${{ parameters.terraformVersion }}
+
+                - template: install-terragrunt.yml
+                  parameters:
+                    installTerragrunt: ${{ parameters.installTerragrunt }}
+                    terragruntVersion: ${{ parameters.terragruntVersion }}
