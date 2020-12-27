@@ -47,6 +47,10 @@ parameters:
     type: string
     default: 0.26.7
 
+  - name: terragruntRunAll
+    type: boolean
+    default: false
+
   - name: workingDirectory
     type: string
 
@@ -146,6 +150,11 @@ stages:
             parameters:
               installTerragrunt: ${{ parameters.installTerragrunt }}
               terragruntVersion: ${{ parameters.terragruntVersion }}
+
+          - template: terragrunt-validate.yml
+            parameters:
+              workingDirectory: ${{ parameters.workingDirectory }}
+              runAll: ${{ parameters.terragruntRunAll }}
 
   - stage: Deploy
     dependsOn: [Validation]

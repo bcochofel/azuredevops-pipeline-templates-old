@@ -137,22 +137,18 @@ stages:
               tflintVersion: ${{ parameters.tflintVersion }}
               tflintRulesetAzurermVersion: ${{ parameters.tflintRulesetAzurermVersion }}
 
-          - template: tf-init.yml
+          - template: terraform-init.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
               backendKey: ${{ parameters.backendKey }}
               preInitSteps: ${{ parameters.preInitSteps }}
               postInitSteps: ${{ parameters.postInitSteps }}
 
-          - template: tf-validate.yml
+          - template: terraform-validate.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
 
-          - template: tflint.yml
-            parameters:
-              workingDirectory: ${{ parameters.workingDirectory }}
-
-          - template: tf-plan.yml
+          - template: terraform-plan.yml
             parameters:
               workingDirectory: ${{ parameters.workingDirectory }}
               prComments: ${{ parameters.prComments }}
@@ -211,7 +207,7 @@ stages:
                     artifact: $(artifact_name)
                     path: "${{ parameters.workingDirectory }}/.terraform"
 
-                - template: tf-apply.yml
+                - template: terraform-apply.yml
                   parameters:
                     workingDirectory: ${{ parameters.workingDirectory }}
                     applyEnvVars: ${{ parameters.applyEnvVars }}

@@ -20,6 +20,7 @@ The template accepts the following parameters.
 | tflintRulesetAzurermVersion | no | `0.5.0` | AzureRM TFLint Ruleset version. |
 | installTerragrunt | no | `true` | whether or not to install Terragrunt. |
 | terragruntVersion | no | `0.26.7` | terragrunt version to install (if `installTerragrunt` is true) |
+| terragruntRunAll | no | `false` | whether or not the execute `validate-all plan-all apply-all` commands. |
 | workingDirectory | yes | none | terraform files directory to execute commands. |
 | prComments | no | `true` | whether or not tp do Azure DevOps PR comments for terraform plan. |
 | preInitSteps | no | `[]` | pre terraform init steps. |
