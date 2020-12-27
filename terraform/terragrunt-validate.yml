@@ -15,6 +15,9 @@ steps:
       script: |
         set -eu
         terragrunt validate
+    env:
+      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
 
   - task: Bash@3
     displayName: "[terragrunt validate-all]"
@@ -25,3 +28,6 @@ steps:
       script: |
         set -eu
         terragrunt validate-all
+    env:
+      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      AZDO_PERSONAL_ACCESS_TOKEN: $(AZDO_PERSONAL_ACCESS_TOKEN)
