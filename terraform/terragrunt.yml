@@ -72,11 +72,11 @@ parameters:
 
   - name: tfPlanFile
     type: string
-    default: ".terraform/tfplan.out"
+    default: "tfplan.out"
 
   - name: tfJSONFile
     type: string
-    default: ".terraform/tfplan.out.json"
+    default: "tfplan.out.json"
 
   - name: prePlanSteps
     type: stepList
@@ -117,6 +117,10 @@ stages:
           - group: ${{ vg }}
       - name: System.Debug
         value: ${{ parameters.debug }}
+      - name: tfPlanFile
+        value: "/tmp/${{ parameters.tfPlanFile }}"
+      - name: tfJsonFile
+        value: "/tmp/${{ parameters.tfJSONFile }}"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:
@@ -159,6 +163,10 @@ stages:
           - group: ${{ vg }}
       - name: System.Debug
         value: ${{ parameters.debug }}
+      - name: tfPlanFile
+        value: "/tmp/${{ parameters.tfPlanFile }}"
+      - name: tfJsonFile
+        value: "/tmp/${{ parameters.tfJSONFile }}"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:

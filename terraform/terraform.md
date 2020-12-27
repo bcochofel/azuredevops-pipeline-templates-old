@@ -25,8 +25,8 @@ The template accepts the following parameters.
 | postInitSteps | no | `[]` | post terraform init steps. |
 | planEnvVars | no | `{}` | environment variables for terraform plan command. |
 | planExtraArgs | no | `null` | extra arguments for terraform plan command. |
-| tfPlanFile | no | `.terraform/tfplan.out` | terraform plan output file. |
-| tfJSONFile | no | `.terraform/tfplan.out.json` | terraform show output file. |
+| tfPlanFile | no | `tfplan.out` | terraform plan output file. |
+| tfJSONFile | no | `tfplan.out.json` | terraform show output file. |
 | prePlanSteps | no | `[]` | pre terraform plan steps. |
 | postPlanSteps | no | `[]` | post terraform plan steps. |
 | environment | yes | `null` | environment to deploy infrastructure. (**) |
