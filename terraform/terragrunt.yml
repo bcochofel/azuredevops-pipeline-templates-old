@@ -165,10 +165,6 @@ stages:
               prePlanSteps: ${{ parameters.prePlanSteps }}
               postPlanSteps: ${{ parameters.postPlanSteps }}
 
-          - template: conftest.yml
-            parameters:
-              workingDirectory: ${{ parameters.workingDirectory }}
-
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: "${{ parameters.workingDirectory }}/.terragrunt-cache"
