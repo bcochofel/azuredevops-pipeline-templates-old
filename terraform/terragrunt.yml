@@ -167,7 +167,7 @@ stages:
 
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: "${{ parameters.workingDirectory }}/.terragrunt-cache"
+              targetPath: "${{ parameters.workingDirectory }}/**/.terragrunt-cache"
               artifactName: $(artifact_name)
 
   - stage: Deploy
