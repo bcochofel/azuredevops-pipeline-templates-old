@@ -12,11 +12,11 @@ steps:
       targetType: 'inline'
       script: |
         set -eu
-        curl -sL https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VER}/terragrunt_linux_amd64 --output terragrunt
+        curl -sL https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VER}/terragrunt_linux_amd64 --output terragrunt
         chmod +x terragrunt
         echo "##vso[task.prependpath]$(Build.SourcesDirectory)"
-      env:
-        TG_VER: ${{ parameters.terragruntVersion }}
+    env:
+      TERRAGRUNT_VER: ${{ parameters.terragruntVersion }}
 
   - task: Bash@3
     displayName: "terragrunt version]"
