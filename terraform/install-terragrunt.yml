@@ -20,7 +20,7 @@ steps:
 
   - task: Bash@3
     displayName: "terragrunt version]"
-    condition: and(succeeded(), eq({{ parameters.installTerragrunt }}', true))
+    condition: and(succeeded(), eq('${{ parameters.installTerragrunt }}', true))
     inputs:
       targetType: 'inline'
       script: |
