@@ -70,14 +70,6 @@ parameters:
     type: string
     default: ""
 
-  - name: tfPlanFile
-    type: string
-    default: "tfplan.out"
-
-  - name: tfJSONFile
-    type: string
-    default: "tfplan.out.json"
-
   - name: prePlanSteps
     type: stepList
     default: []
@@ -118,9 +110,9 @@ stages:
       - name: System.Debug
         value: ${{ parameters.debug }}
       - name: tfPlanFile
-        value: "/tmp/${{ parameters.tfPlanFile }}"
+        value: "/tmp/tfplan.out"
       - name: tfJsonFile
-        value: "/tmp/${{ parameters.tfJSONFile }}"
+        value: "/tmp/tfplan.out.json"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:

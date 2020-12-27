@@ -65,14 +65,6 @@ parameters:
     type: string
     default: ""
 
-  - name: tfPlanFile
-    type: string
-    default: "tfplan.out"
-
-  - name: tfJSONFile
-    type: string
-    default: "tfplan.out.json"
-
   - name: prePlanSteps
     type: stepList
     default: []
@@ -113,9 +105,9 @@ stages:
       - name: System.Debug
         value: ${{ parameters.debug }}
       - name: tfPlanFile
-        value: ".terraform/${{ parameters.tfPlanFile }}"
+        value: ".terraform/tfplan.out"
       - name: tfJsonFile
-        value: ".terraform/${{ parameters.tfJSONFile }}"
+        value: ".terraform/tfplan.out.json"
       - name: artifact_name
         value: ${{ parameters.environment }}-plan-$(Build.BuildID)
     jobs:
