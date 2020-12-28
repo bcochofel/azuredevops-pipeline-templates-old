@@ -166,8 +166,9 @@ stages:
               postPlanSteps: ${{ parameters.postPlanSteps }}
 
           - task: PublishPipelineArtifact@1
+            condition: and(succeeded(), eq('${{ parameters.terragruntRunAll }}', false))
             inputs:
-              targetPath: "${{ parameters.workingDirectory }}/**/.terragrunt-cache"
+              targetPath: "${{ parameters.workingDirectory }}/.terragrunt-cache"
               artifactName: $(artifact_name)
 
   - stage: Deploy
@@ -210,6 +211,7 @@ stages:
                     terragruntVersion: ${{ parameters.terragruntVersion }}
 
                 - task: DownloadPipelineArtifact@2
+                  condition: and(succeeded(), eq('${{ parameters.terragruntRunAll }}', false))
                   inputs:
                     artifact: $(artifact_name)
                     path: "${{ parameters.workingDirectory }}/.terragrunt-cache"
