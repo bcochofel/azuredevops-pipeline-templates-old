@@ -78,6 +78,7 @@ stages:
 ```
 
 **NOTES:**
+* This uses the GitHub Service Connection on the resources block
 * The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
 * The `terragruntRunAll` can be set to `true` to deploy all the modules in a region or environment.
 
@@ -119,5 +120,7 @@ stages:
 ```
 
 **NOTES:**
+* This uses the GitHub Service Connection on the resources block
 * The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
 * The `terragruntRunAll` can be set to `true` to deploy all the modules in a region or environment.
+* When `terragruntRunAll` is set to `true` artifacts will not be published. Running `apply-all` will handle the full workflow.

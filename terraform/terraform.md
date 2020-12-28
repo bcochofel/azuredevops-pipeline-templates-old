@@ -75,7 +75,9 @@ stages:
       backendKey: example-network.tfstate
 ```
 
-**NOTE:** The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+**NOTE:**
+* This uses the GitHub Service Connection on the resources block
+* The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
 
 ## Pipeline for Terraform Deployment
 
@@ -114,4 +116,6 @@ stages:
       backendKey: example-network.tfstate
 ```
 
-**NOTE:** The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
+**NOTE:**
+* This uses the GitHub Service Connection on the resources block
+* The `prComments` parameter needs to be set to `false` if not using Azure DevOps repositories.
