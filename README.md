@@ -1,14 +1,28 @@
 # Introduction
 
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![GitHub license](https://img.shields.io/github/license/bcochofel/azuredevops-pipeline-templates.svg)](https://github.com/bcochofel/azuredevops-pipeline-templates/blob/master/LICENSE)
-[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bcochofel/azuredevops-pipeline-templates)](https://github.com/bcochofel/azuredevops-pipeline-templates/tags)
-[![GitHub issues](https://img.shields.io/github/issues/bcochofel/azuredevops-pipeline-templates.svg)](https://github.com/bcochofel/azuredevops-pipeline-templates/issues/)
-[![GitHub forks](https://img.shields.io/github/forks/bcochofel/azuredevops-pipeline-templates.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/bcochofel/azuredevops-pipeline-templates/network/)
-[![GitHub stars](https://img.shields.io/github/stars/bcochofel/azuredevops-pipeline-templates.svg?style=social&label=Star&maxAge=2592000)](https://github.com/bcochofel/azuredevops-pipeline-templates/stargazers/)
+[![pre-commit badge][pre-commit-badge]][pre-commit] [![Conventional commits badge][conventional-commits-badge]][conventional-commits] [![Keep a Changelog v1.1.0 badge][keep-a-changelog-badge]][keep-a-changelog] [![MIT License Badge][license-badge]][license]
 
 Templates to use on Azure DevOps Pipelines.
+
+# pre-commit hooks
+
+Read the [pre-commit hooks](docs/pre-commit-hooks.md) document for more info.
+
+# git-chglog
+
+Read the [git-chglog](docs/git-chlog.md) document for more info.
 
 # Getting Started
 
 Just use Resources on your pipelines to use this templates.
+
+[pre-commit]: https://github.com/pre-commit/pre-commit
+[pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+[conventional-commits-badge]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg
+[conventional-commits]: https://conventionalcommits.org
+[keep-a-changelog-badge]: https://img.shields.io/badge/changelog-Keep%20a%20Changelog%20v1.1.0-%23E05735
+[keep-a-changelog]: https://keepachangelog.com/en/1.0.0/
+[license]: ./LICENSE
+[license-badge]: https://img.shields.io/badge/license-MIT-green.svg
+[changelog]: ./CHANGELOG.md
+[changelog-badge]: https://img.shields.io/badge/changelog-Keep%20a%20Changelog%20v1.1.0-%23E05735
