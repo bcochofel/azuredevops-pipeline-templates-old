@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="0.3.0"></a>
+## [0.3.0] - 2021-01-18
+### Fix
+- gihutb workflows
+
+
 <a name="0.2.0"></a>
 ## [0.2.0] - 2021-01-16
 ### Feat
@@ -43,5 +49,6 @@
 - Merge pull request [#1](https://github.com/bcochofel/azuredevops-pipeline-templates/issues/1) from bcochofel/first-commit
 
 
-[Unreleased]: https://github.com/bcochofel/azuredevops-pipeline-templates/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/bcochofel/azuredevops-pipeline-templates/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/bcochofel/azuredevops-pipeline-templates/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/bcochofel/azuredevops-pipeline-templates/compare/0.1.0...0.2.0
